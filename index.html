@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa GPS</title>
+    <!-- Estilo para Leaflet (el mapa) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { height: 500px; width: 100%; }
+    </style>
+</head>
+<body>
+    <h1>Ubicaciones GPS en el Mapa</h1>
+    <div id="map"></div>
+    
+    <!-- Scripts necesarios -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Inicializar el mapa en una vista general
+        const map = L.map('map').setView([0, 0], 2);
+
+        // Agregar el tile layer de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Obtener datos GPS desde la API
+        fetch('http://localhost:3000/gps-data')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(coord => {
+                    // Añadir marcador en el mapa para cada coordenada GPS
+                    L.marker([coord.latitud, coord.longitud]).addTo(map)
+                     .bindPopup(`<b>Latitud:</b> ${coord.latitud}<br><b>Longitud:</b> ${coord.longitud}`);
+                });
+                // Centrar el mapa en la primera coordenada obtenida
+                if (data.length > 0) {
+                    map.setView([data[0].latitud, data[0].longitud], 13);
+                }
+            })
+            .catch(error => console.error('Error al obtener datos GPS:', error));
+    </script>
+</body>
+</html>
